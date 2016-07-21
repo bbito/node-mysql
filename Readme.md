@@ -23,7 +23,7 @@
 - [Pool events](#pool-events)
 - [Closing all the connections in a pool](#closing-all-the-connections-in-a-pool)
 - [PoolCluster](#poolcluster)
-- [PoolCluster Option](#poolcluster-option)
+- [PoolCluster options](#poolcluster-options)
 - [Switching users and altering connection state](#switching-users-and-altering-connection-state)
 - [Server disconnects](#server-disconnects)
 - [Performing queries](#performing-queries)
@@ -63,10 +63,10 @@ Sometimes I may also ask you to install the latest version from Github to check
 if a bugfix is working. In this case, please do:
 
 ```sh
-$ npm install felixge/node-mysql
+$ npm install mysqljs/mysql
 ```
 
-[v0.9 branch]: https://github.com/felixge/node-mysql/tree/v0.9
+[v0.9 branch]: https://github.com/mysqljs/mysql/tree/v0.9
 
 ## Introduction
 
@@ -106,7 +106,7 @@ From this example, you can learn the following:
 Thanks goes to the people who have contributed code to this module, see the
 [GitHub Contributors page][].
 
-[GitHub Contributors page]: https://github.com/felixge/node-mysql/graphs/contributors
+[GitHub Contributors page]: https://github.com/mysqljs/mysql/graphs/contributors
 
 Additionally I'd like to thank the following people:
 
@@ -200,7 +200,7 @@ When establishing a connection, you can set the following options:
 * `connectTimeout`: The milliseconds before a timeout occurs during the initial connection
   to the MySQL server. (Default: `10000`)
 * `stringifyObjects`: Stringify objects instead of converting to values. See
-issue [#501](https://github.com/felixge/node-mysql/issues/501). (Default: `'false'`)
+issue [#501](https://github.com/mysqljs/mysql/issues/501). (Default: `'false'`)
 * `insecureAuth`: Allow connecting to MySQL instances that ask for the old
   (insecure) authentication method. (Default: `false`)
 * `typeCast`: Determines if column values should be converted to native
@@ -312,7 +312,8 @@ var pool  = mysql.createPool({
   connectionLimit : 10,
   host            : 'example.org',
   user            : 'bob',
-  password        : 'secret'
+  password        : 'secret',
+  database        : 'my_db'
 });
 
 pool.query('SELECT 1 + 1 AS solution', function(err, rows, fields) {
@@ -330,7 +331,8 @@ var mysql = require('mysql');
 var pool  = mysql.createPool({
   host     : 'example.org',
   user     : 'bob',
-  password : 'secret'
+  password : 'secret',
+  database : 'my_db'
 });
 
 pool.getConnection(function(err, connection) {
@@ -370,9 +372,9 @@ to the server to check if the connection is still good.
 
 ## Pool options
 
-Pools accept all the same options as a connection. When creating a new
-connection, the options are simply passed to the connection constructor. In
-addition to those options pools accept a few extras:
+Pools accept all the same [options as a connection](#connection-options).
+When creating a new connection, the options are simply passed to the connection
+constructor. In addition to those options pools accept a few extras:
 
 * `acquireTimeout`: The milliseconds before a timeout occurs during the connection
   acquisition. This is slightly different from `connectTimeout`, because acquiring
@@ -441,9 +443,9 @@ PoolCluster provides multiple hosts connection. (group & retry & selector)
 // create
 var poolCluster = mysql.createPoolCluster();
 
-// add configurations
-poolCluster.add(config); // anonymous group
-poolCluster.add('MASTER', masterConfig);
+// add configurations (the config is a pool config object)
+poolCluster.add(config); // add configuration with automatic name
+poolCluster.add('MASTER', masterConfig); // add a named configuration
 poolCluster.add('SLAVE1', slave1Config);
 poolCluster.add('SLAVE2', slave2Config);
 
@@ -478,7 +480,8 @@ poolCluster.end(function (err) {
 });
 ```
 
-## PoolCluster Option
+### PoolCluster options
+
 * `canRetry`: If `true`, `PoolCluster` will attempt to reconnect when connection fails. (Default: `true`)
 * `removeNodeErrorCount`: If connection fails, node's `errorCount` increases. 
   When `errorCount` is greater than `removeNodeErrorCount`, remove a node in the `PoolCluster`. (Default: `5`)
@@ -622,6 +625,16 @@ connection.query('SELECT * FROM users WHERE id = ?', [userId], function(err, res
 });
 ```
 
+Multiple placeholders are mapped to values in the same order as passed. For example,
+in the following query `foo` equals `a`, `bar` equals `b`, `baz` equals `c`, and
+`id` will be `userId`:
+
+```js
+connection.query('UPDATE users SET foo = ?, bar = ?, baz = ? WHERE id = ?', ['a', 'b', 'c', userId], function(err, results) {
+  // ...
+});
+```
+
 This looks similar to prepared statements in MySQL, however it really just uses
 the same `connection.escape()` method internally.
 
@@ -755,7 +768,7 @@ connection.query('INSERT INTO posts SET ?', {title: 'test'}, function(err, resul
 
 When dealing with big numbers (above JavaScript Number precision limit), you should
 consider enabling `supportBigNumbers` option to be able to read the insert id as a
-string, otherwise it will throw.
+string, otherwise it will throw an error.
 
 This option is also required when fetching big numbers from the database, otherwise
 you will get values rounded to hundreds or thousands due to the precision limit.
@@ -1209,7 +1222,7 @@ connection.query({
   }
 });
 ```
-__WARNING: YOU MUST INVOKE the parser using one of these three field functions in your custom typeCast callback. They can only be called once. (see [#539](https://github.com/felixge/node-mysql/issues/539) for discussion)__
+__WARNING: YOU MUST INVOKE the parser using one of these three field functions in your custom typeCast callback. They can only be called once. (see [#539](https://github.com/mysqljs/mysql/issues/539) for discussion)__
 
 ```
 field.string()
@@ -1222,7 +1235,7 @@ parser.parseLengthCodedString()
 parser.parseLengthCodedBuffer()
 parser.parseGeometryValue()
 ```
-__You can find which field function you need to use by looking at: [RowDataPacket.prototype._typeCast](https://github.com/felixge/node-mysql/blob/master/lib/protocol/packets/RowDataPacket.js#L41)__
+__You can find which field function you need to use by looking at: [RowDataPacket.prototype._typeCast](https://github.com/mysqljs/mysql/blob/master/lib/protocol/packets/RowDataPacket.js#L41)__
 
 
 ## Connection Flags
@@ -1322,7 +1335,9 @@ $ FILTER=unit npm test
 ### Running integration tests
 
 Set the environment variables `MYSQL_DATABASE`, `MYSQL_HOST`, `MYSQL_PORT`,
-`MYSQL_USER` and `MYSQL_PASSWORD`. Then run `npm test`.
+`MYSQL_USER` and `MYSQL_PASSWORD`. `MYSQL_SOCKET` can also be used in place
+of `MYSQL_HOST` and `MYSQL_PORT` to connect over a UNIX socket. Then run
+`npm test`.
 
 For example, if you have an installation of mysql running on localhost:3306
 and no password set for the `root` user, run:
@@ -1341,11 +1356,11 @@ $ MYSQL_HOST=localhost MYSQL_PORT=3306 MYSQL_DATABASE=node_mysql_test MYSQL_USER
 [npm-url]: https://npmjs.org/package/mysql
 [node-version-image]: https://img.shields.io/node/v/mysql.svg
 [node-version-url]: https://nodejs.org/en/download/
-[travis-image]: https://img.shields.io/travis/felixge/node-mysql/master.svg?label=linux
-[travis-url]: https://travis-ci.org/felixge/node-mysql
+[travis-image]: https://img.shields.io/travis/mysqljs/mysql/master.svg?label=linux
+[travis-url]: https://travis-ci.org/mysqljs/mysql
 [appveyor-image]: https://img.shields.io/appveyor/ci/dougwilson/node-mysql/master.svg?label=windows
 [appveyor-url]: https://ci.appveyor.com/project/dougwilson/node-mysql
-[coveralls-image]: https://img.shields.io/coveralls/felixge/node-mysql/master.svg
-[coveralls-url]: https://coveralls.io/r/felixge/node-mysql?branch=master
+[coveralls-image]: https://img.shields.io/coveralls/mysqljs/mysql/master.svg
+[coveralls-url]: https://coveralls.io/r/mysqljs/mysql?branch=master
 [downloads-image]: https://img.shields.io/npm/dm/mysql.svg
 [downloads-url]: https://npmjs.org/package/mysql

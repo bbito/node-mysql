@@ -76,6 +76,14 @@ common.createFakeServer = function(options) {
   return new FakeServer(common.extend({}, options));
 };
 
+common.detectNewline = function detectNewline(path) {
+  var newlines = fs.readFileSync(path, 'utf8').match(/(?:\r?\n)/g) || [];
+  var crlf = newlines.filter(function (nl) { return nl === '\r\n'; }).length;
+  var lf = newlines.length - crlf;
+
+  return crlf > lf ? '\r\n' : '\n';
+};
+
 common.extend = function extend(dest, src) {
   for (var key in src) {
     dest[key] = src[key];
@@ -146,10 +154,11 @@ common.getSSLConfig = function() {
 
 function mergeTestConfig(config) {
   config = common.extend({
-    host     : process.env.MYSQL_HOST,
-    port     : process.env.MYSQL_PORT,
-    user     : process.env.MYSQL_USER,
-    password : process.env.MYSQL_PASSWORD
+    host       : process.env.MYSQL_HOST,
+    port       : process.env.MYSQL_PORT,
+    user       : process.env.MYSQL_USER,
+    password   : process.env.MYSQL_PASSWORD,
+    socketPath : process.env.MYSQL_SOCKET
   }, config);
 
   return config;

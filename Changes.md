@@ -4,11 +4,29 @@ This file is a manually maintained list of changes for each release. Feel free
 to add your changes here when sending pull requests. Also send corrections if
 you spot any mistakes.
 
-## HEAD
+## v2.11.1 (2016-06-07)
 
+* Fix writing truncated packets starting with large string/buffer #1438
+
+## v2.11.0 (2016-06-06)
+
+* Add `POOL_CLOSED` code to "Pool is closed." error
 * Add `POOL_CONNLIMIT` code to "No connections available." error #1332
+* Bind underlying connections in pool to same domain as pool #1242
+* Bind underlying socket to same domain as connection #1243
+* Fix allocation errors receiving many result rows #918 #1265 #1324 #1415
+* Fix edge cases constructing long stack traces #1387
+* Fix handshake inactivity timeout on Node.js v4.2.0 #1223 #1236 #1239 #1240 #1241 #1252
 * Fix Query stream to emit close after ending #1349 #1350
+* Fix type cast for BIGINT columns when number is negative #1376
 * Performance improvements for array/object escaping in SqlString #1331
+* Performance improvements for formatting in SqlString #1431
+* Performance improvements for string escaping in SqlString #1390
+* Performance improvements for writing packets to network
+* Support Node.js 6.x
+* Update `bignumber.js` to 2.3.0
+* Update `readable-stream` to 1.1.14
+* Use the `sqlstring` module for SQL escaping and formatting
 
 ## v2.10.2 (2016-01-12)
 
@@ -427,21 +445,21 @@ or open an issue to improve this document.
 
 These releases were done before maintaining this file:
 
-* [v0.9.0](https://github.com/felixge/node-mysql/compare/v0.8.0...v0.9.0)
+* [v0.9.0](https://github.com/mysqljs/mysql/compare/v0.8.0...v0.9.0)
   (2011-01-04)
-* [v0.8.0](https://github.com/felixge/node-mysql/compare/v0.7.0...v0.8.0)
+* [v0.8.0](https://github.com/mysqljs/mysql/compare/v0.7.0...v0.8.0)
   (2010-10-30)
-* [v0.7.0](https://github.com/felixge/node-mysql/compare/v0.6.0...v0.7.0)
+* [v0.7.0](https://github.com/mysqljs/mysql/compare/v0.6.0...v0.7.0)
   (2010-10-14)
-* [v0.6.0](https://github.com/felixge/node-mysql/compare/v0.5.0...v0.6.0)
+* [v0.6.0](https://github.com/mysqljs/mysql/compare/v0.5.0...v0.6.0)
   (2010-09-28)
-* [v0.5.0](https://github.com/felixge/node-mysql/compare/v0.4.0...v0.5.0)
+* [v0.5.0](https://github.com/mysqljs/mysql/compare/v0.4.0...v0.5.0)
   (2010-09-17)
-* [v0.4.0](https://github.com/felixge/node-mysql/compare/v0.3.0...v0.4.0)
+* [v0.4.0](https://github.com/mysqljs/mysql/compare/v0.3.0...v0.4.0)
   (2010-09-02)
-* [v0.3.0](https://github.com/felixge/node-mysql/compare/v0.2.0...v0.3.0)
+* [v0.3.0](https://github.com/mysqljs/mysql/compare/v0.2.0...v0.3.0)
   (2010-08-25)
-* [v0.2.0](https://github.com/felixge/node-mysql/compare/v0.1.0...v0.2.0)
+* [v0.2.0](https://github.com/mysqljs/mysql/compare/v0.1.0...v0.2.0)
   (2010-08-22)
-* [v0.1.0](https://github.com/felixge/node-mysql/commits/v0.1.0)
+* [v0.1.0](https://github.com/mysqljs/mysql/commits/v0.1.0)
   (2010-08-22)
